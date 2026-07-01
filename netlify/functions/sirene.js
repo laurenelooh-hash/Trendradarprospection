@@ -19,11 +19,10 @@ exports.handler = async function (event) {
       geoFilter = ` AND codePostalEtablissement:${cp}`;
     } else if (dept) {
       const d = dept.padStart(2, '0');
-      geoFilter = ` AND codePostalEtablissement:${d}*`;
+      geoFilter = ` AND codeDepartementEtablissement:${d}`;
     }
 
-    const nafForQuery = naf.trim();
-    const q = `activitePrincipaleEtablissement:"${nafForQuery}" AND etatAdministratifEtablissement:A${geoFilter}`;
+    const q = `activitePrincipaleEtablissement:"${naf.trim()}" AND etatAdministratifEtablissement:A${geoFilter}`;
     const url = `https://api.insee.fr/api-sirene/3.11/siret?q=${encodeURIComponent(q)}&nombre=200&champs=denominationUsuelleUniteLegale,denominationUniteLegale,nomUsageUniteLegale,prenom1UniteLegale,nomUniteLegale,siren,siret,numeroVoieEtablissement,typeVoieEtablissement,libelleVoieEtablissement,codePostalEtablissement,libelleCommuneEtablissement,activitePrincipaleEtablissement,trancheEffectifsEtablissement&tri=denominationUniteLegale&ordre=asc`;
 
     try {
@@ -35,12 +34,7 @@ exports.handler = async function (event) {
       });
 
       if (resp.status === 404) continue;
-
-      if (!resp.ok) {
-        const txt = await resp.text();
-        console.error(`INSEE error ${resp.status} for NAF ${naf}:`, txt.slice(0, 200));
-        continue;
-      }
+      if (!resp.ok) { console.error(`INSEE ${resp.status} NAF ${naf}`); continue; }
 
       const data = await resp.json();
       totalGlobal += data.header?.total || 0;
@@ -64,20 +58,15 @@ exports.handler = async function (event) {
         ].filter(Boolean).join(' ') || '—';
 
         results.push({
-          nom:      nom.trim(),
-          siren:    e.siren || '',
-          siret:    e.siret || '',
-          adresse,
-          ville:    adr.libelleCommuneEtablissement || '',
-          cp:       adr.codePostalEtablissement || '',
-          naf:      per?.activitePrincipaleEtablissement || naf,
+          nom: nom.trim(), siren: e.siren || '', siret: e.siret || '',
+          adresse, ville: adr.libelleCommuneEtablissement || '',
+          cp: adr.codePostalEtablissement || '',
+          naf: per?.activitePrincipaleEtablissement || naf,
           effectif: decodeEffectif(e.trancheEffectifsEtablissement),
         });
       });
 
-    } catch (err) {
-      console.error(`Fetch error for NAF ${naf}:`, err.message);
-    }
+    } catch (err) { console.error(`Error NAF ${naf}:`, err.message); }
   }
 
   const seen = new Set();
@@ -88,10 +77,7 @@ exports.handler = async function (event) {
 
   return {
     statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     body: JSON.stringify({ total: totalGlobal, results: unique }),
   };
 };
