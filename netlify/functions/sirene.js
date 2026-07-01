@@ -9,7 +9,6 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'naf manquant' }) };
   }
 
-  // Un seul appel avec tous les NAF en OR
   const nafQuery = nafCodes.map(n => `activitePrincipaleEtablissement:${n.trim()}`).join(' OR ');
 
   let geoFilter = '';
@@ -21,7 +20,9 @@ exports.handler = async function (event) {
   }
 
   const q = `(${nafQuery}) AND etatAdministratifEtablissement:A${geoFilter}`;
-  const url = `https://api.insee.fr/api-sirene/3.11/siret?q=${encodeURIComponent(q)}&nombre=200&champs=denominationUsuelleUniteLegale,denominationUniteLegale,nomUsageUniteLegale,prenom1UniteLegale,nomUniteLegale,siren,siret,numeroVoieEtablissement,typeVoieEtablissement,libelleVoieEtablissement,codePostalEtablissement,libelleCommuneEtablissement,activitePrincipaleEtablissement,trancheEffectifsEtablissement&tri=denominationUniteLegale&ordre=asc`;
+
+  // Pas de paramètre champs — on récupère tout
+  const url = `https://api.insee.fr/api-sirene/3.11/siret?q=${encodeURIComponent(q)}&nombre=200&tri=denominationUniteLegale&ordre=asc`;
 
   try {
     const resp = await fetch(url, {
@@ -41,27 +42,40 @@ exports.handler = async function (event) {
 
     if (!resp.ok) {
       const txt = await resp.text();
-      console.error(`INSEE ${resp.status}:`, txt.slice(0, 300));
+      console.error(`INSEE ${resp.status}:`, txt.slice(0, 400));
       return {
         statusCode: resp.status,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: `INSEE API ${resp.status}`, detail: txt.slice(0, 200) }),
+        body: JSON.stringify({ error: `INSEE API ${resp.status}`, detail: txt.slice(0, 300) }),
       };
     }
 
     const data = await resp.json();
+
     const results = (data.etablissements || []).map(e => {
       const ul  = e.uniteLegale || {};
       const adr = e.adresseEtablissement || {};
       const per = Array.isArray(e.periodesEtablissement) ? e.periodesEtablissement[0] : {};
+
       const nom = ul.denominationUsuelleUniteLegale
         || ul.denominationUniteLegale
         || [ul.prenom1UniteLegale, ul.nomUsageUniteLegale || ul.nomUniteLegale].filter(Boolean).join(' ')
         || '—';
-      const adresse = [adr.numeroVoieEtablissement, adr.typeVoieEtablissement, adr.libelleVoieEtablissement, adr.codePostalEtablissement, adr.libelleCommuneEtablissement].filter(Boolean).join(' ') || '—';
+
+      const adresse = [
+        adr.numeroVoieEtablissement,
+        adr.typeVoieEtablissement,
+        adr.libelleVoieEtablissement,
+        adr.codePostalEtablissement,
+        adr.libelleCommuneEtablissement,
+      ].filter(Boolean).join(' ') || '—';
+
       return {
-        nom: nom.trim(), siren: e.siren || '', siret: e.siret || '',
-        adresse, ville: adr.libelleCommuneEtablissement || '',
+        nom: nom.trim(),
+        siren: e.siren || '',
+        siret: e.siret || '',
+        adresse,
+        ville: adr.libelleCommuneEtablissement || '',
         cp: adr.codePostalEtablissement || '',
         naf: per?.activitePrincipaleEtablissement || '',
         effectif: decodeEffectif(e.trancheEffectifsEtablissement),
