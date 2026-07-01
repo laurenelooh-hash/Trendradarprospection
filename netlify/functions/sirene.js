@@ -9,7 +9,6 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'naf manquant' }) };
   }
 
-  // Guillemets autour de chaque code NAF pour gérer le point (ex: 10.71C)
   const nafQuery = nafCodes.map(n => `activitePrincipaleEtablissement:"${n.trim()}"`).join(' OR ');
 
   let geoFilter = '';
@@ -17,7 +16,7 @@ exports.handler = async function (event) {
     geoFilter = ` AND codePostalEtablissement:${cp}`;
   } else if (dept) {
     const d = dept.length === 1 ? '0' + dept : dept;
-    geoFilter = ` AND codePostalEtablissement:[${d}000 TO ${d}999]`;
+    geoFilter = ` AND codePostalEtablissement:${d}*`;
   }
 
   const q = `(${nafQuery}) AND etatAdministratifEtablissement:A${geoFilter}`;
