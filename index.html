@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrendRadar — Prospection Entreprises</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+  :root {
+    --navy: #0D1B3E; --navy-mid: #1A2F5E;
+    --teal: #00B4D8; --teal-light: #90E0EF;
+    --white: #FFFFFF; --off-white: #F0F4FA;
+    --text-main: #1A2F5E; --text-muted: #5A6A8A;
+    --border: #D0DCF0; --tag-bg: #EBF4FF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--off-white); color: var(--text-main); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e3a6e 100%);
+    padding: 18px 28px; display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 4px 24px rgba(13,27,62,0.3); position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(0,180,216,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hicon { width: 42px; height: 42px; background: rgba(0,180,216,0.15); border: 1.5px solid rgba(0,180,216,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 19px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+  .header h1 span { color: var(--teal); }
+  .header p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .hbadge { margin-left: auto; background: rgba(0,180,216,0.15); border: 1px solid rgba(0,180,216,0.35); color: var(--teal-light); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+
+  /* ── LAYOUT ── */
+  .main { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 78px); }
+
+  /* ── SIDEBAR ── */
+  .sidebar { background: white; border-right: 1px solid var(--border); padding: 20px 16px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; max-height: calc(100vh - 78px); position: sticky; top: 0; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .slabel { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .slabel::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .swrap { position: relative; margin-bottom: 8px; }
+  .swrap input { width: 100%; padding: 9px 32px 9px 34px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 12.5px; font-family: 'Inter', sans-serif; background: var(--off-white); color: var(--text-main); outline: none; transition: all 0.2s; }
+  .swrap input:focus { border-color: var(--teal); background: white; box-shadow: 0 0 0 3px rgba(0,180,216,0.1); }
+  .swrap .si { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; opacity: 0.45; pointer-events: none; }
+  .swrap .sc { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 13px; color: var(--text-muted); display: none; }
+
+  .slist { display: flex; flex-direction: column; gap: 2px; max-height: 340px; overflow-y: auto; padding-right: 2px; }
+  .slist::-webkit-scrollbar { width: 3px; }
+  .slist::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .ftitle { font-size: 9.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); padding: 6px 6px 2px; margin-top: 2px; }
+  .sbtn { width: 100%; padding: 7px 10px; background: none; border: 1px solid transparent; border-radius: 7px; font-size: 12px; font-family: 'Inter', sans-serif; color: var(--text-main); cursor: pointer; text-align: left; transition: all 0.12s; display: flex; align-items: center; gap: 6px; }
+  .sbtn:hover { background: var(--tag-bg); border-color: var(--border); }
+  .sbtn.active { background: linear-gradient(135deg,#e8f4fd,#dbeeff); border-color: rgba(0,180,216,0.4); font-weight: 600; color: var(--navy); }
+  .sbtn .em { font-size: 13px; flex-shrink: 0; }
+  .no-s { padding: 12px 6px; font-size: 12px; color: var(--text-muted); text-align: center; }
+
+  .geo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fg label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .fg input { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--off-white); color: var(--text-main); outline: none; transition: all 0.2s; }
+  .fg input:focus { border-color: var(--teal); background: white; box-shadow: 0 0 0 3px rgba(0,180,216,0.1); }
+
+  .btn-go { width: 100%; padding: 11px; background: linear-gradient(135deg, var(--teal), #0090BB); color: white; border: none; border-radius: 9px; font-size: 13.5px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 7px; }
+  .btn-go:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,180,216,0.35); }
+  .btn-go:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-rst { width: 100%; padding: 8px; background: none; color: var(--text-muted); border: 1.5px solid var(--border); border-radius: 7px; font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; }
+  .btn-rst:hover { border-color: var(--text-muted); color: var(--text-main); }
+
+  .hint { font-size: 11px; color: var(--text-muted); line-height: 1.55; padding: 8px 10px; background: var(--off-white); border-radius: 7px; border: 1px solid var(--border); }
+  .hint strong { color: var(--navy); }
+
+  /* ── CONTENU ── */
+  .content { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+  .stats-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .chip { display: flex; align-items: center; gap: 7px; background: white; border: 1px solid var(--border); padding: 7px 14px; border-radius: 30px; }
+  .chip.hi { border-color: rgba(0,180,216,0.4); background: #f0faff; }
+  .chip .v { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); }
+  .chip.hi .v { color: var(--teal); }
+  .chip .l { color: var(--text-muted); font-size: 11.5px; }
+  .spill { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg,rgba(0,180,216,0.12),rgba(0,180,216,0.06)); border: 1px solid rgba(0,180,216,0.35); color: var(--navy); font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .btn-csv { margin-left: auto; padding: 8px 16px; background: linear-gradient(135deg,var(--navy),var(--navy-mid)); color: white; border: none; border-radius: 7px; font-size: 11.5px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+  .btn-csv:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,27,62,0.3); }
+  .btn-csv:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .banner { background: #fff9ec; border: 1px solid rgba(244,166,33,0.3); border-radius: 9px; padding: 9px 14px; font-size: 11.5px; color: #7A5A10; display: flex; align-items: flex-start; gap: 7px; line-height: 1.5; }
+
+  .tbl-wrap { background: white; border: 1px solid var(--border); border-radius: 13px; overflow: hidden; box-shadow: 0 2px 10px rgba(13,27,62,0.05); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead tr { background: linear-gradient(135deg,var(--navy),var(--navy-mid)); }
+  thead th { padding: 11px 12px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.7); white-space: nowrap; }
+  thead th:first-child { padding-left: 16px; }
+  thead th:last-child  { padding-right: 16px; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--off-white); }
+  td { padding: 9px 12px; vertical-align: middle; }
+  td:first-child { padding-left: 16px; }
+  td:last-child  { padding-right: 16px; }
+
+  .tdn { font-weight: 600; color: var(--navy); max-width: 190px; }
+  .tdn .sir { display: block; font-size: 10px; font-weight: 400; color: var(--text-muted); margin-top: 1px; font-family: monospace; }
+  .tda { color: var(--text-muted); font-size: 11px; max-width: 180px; line-height: 1.4; }
+  .tnaf { font-size: 10.5px; font-family: monospace; background: var(--tag-bg); border: 1px solid #c8dfff; color: #2563EB; padding: 2px 5px; border-radius: 4px; white-space: nowrap; display: inline-block; }
+  .teff { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+  .lks { display: flex; gap: 5px; }
+  .lbtn { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 5px; font-size: 10.5px; font-weight: 600; text-decoration: none; transition: all 0.13s; white-space: nowrap; border: 1px solid transparent; }
+  .lp { background: #fff3e8; color: #c05600; border-color: #ffc899; }
+  .lp:hover { background: #c05600; color: white; border-color: #c05600; }
+  .ll { background: #e8f1ff; color: #0A66C2; border-color: #b3d0ff; }
+  .ll:hover { background: #0A66C2; color: white; border-color: #0A66C2; }
+
+  .pag { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .btn-more { padding: 10px 26px; background: linear-gradient(135deg,#f0faff,#e0f4fc); color: var(--navy); border: 1.5px solid rgba(0,180,216,0.4); border-radius: 9px; font-size: 13px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 7px; }
+  .btn-more:hover { background: linear-gradient(135deg,var(--teal),#0090BB); color: white; border-color: var(--teal); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,180,216,0.3); }
+  .pinfo { font-size: 11.5px; color: var(--text-muted); }
+
+  .empty, .loading, .errbox { background: white; border: 1px solid var(--border); border-radius: 13px; padding: 56px 36px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .eico { font-size: 38px; opacity: 0.3; }
+  .empty h3 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); }
+  .empty p { font-size: 12.5px; color: var(--text-muted); max-width: 340px; line-height: 1.6; }
+  .spin { width: 34px; height: 34px; border: 3px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { font-size: 12.5px; color: var(--text-muted); }
+  .errbox { background: #fff5f5; border-color: #fcc; padding: 18px 22px; }
+  .errbox p { font-size: 12.5px; color: #c0392b; line-height: 1.6; }
+
+  @media (max-width: 860px) { .main { grid-template-columns: 1fr; } .sidebar { max-height: none; position: static; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hicon">📡</div>
+  <div>
+    <h1>TrendRadar — <span>Prospection Entreprises</span></h1>
+    <p>API INSEE Sirene · Base nationale · Mise à jour quotidienne</p>
+  </div>
+  <div class="hbadge">Tous secteurs</div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+
+    <div>
+      <div class="slabel">🏭 Secteur d'activité</div>
+      <div class="swrap">
+        <span class="si">🔍</span>
+        <input id="sIn" type="text" placeholder="coiffure, bâtiment, santé, IA…" oninput="filterS(this.value)">
+        <button class="sc" id="sCl" onclick="clearS()">✕</button>
+      </div>
+      <div class="slist" id="sGrid"></div>
+    </div>
+
+    <div>
+      <div class="slabel">📍 Localisation</div>
+      <div class="geo-grid">
+        <div class="fg"><label>Département</label><input id="dept" type="text" placeholder="ex: 42" maxlength="3"></div>
+        <div class="fg"><label>Code postal</label><input id="cp" type="text" placeholder="ex: 42000" maxlength="5"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <button class="btn-go" id="btnGo" onclick="runSearch()">🔍 Lancer la recherche</button>
+      <button class="btn-rst" onclick="resetAll()">↺ Réinitialiser</button>
+    </div>
+
+    <div class="hint">
+      <strong>ℹ️ Données disponibles</strong><br>
+      Raison sociale · SIREN · Adresse · NAF · Effectif.<br>
+      Email/tél dirigeant : <em>non fourni par l'INSEE</em> — utilisez Pappers.
+    </div>
+
+  </div>
+
+  <div class="content">
+
+    <div class="stats-bar" id="statsBar" style="display:none">
+      <div class="chip hi"><span class="v" id="sAff">0</span><span class="l">affichées</span></div>
+      <div class="chip"><span class="v" id="sTotal">0</span><span class="l">trouvées INSEE</span></div>
+      <span id="sPill"></span>
+      <button class="btn-csv" id="btnCsv" onclick="exportCSV()" disabled>⬇ Exporter CSV</button>
+    </div>
+
+    <div class="banner" id="banner" style="display:none">
+      ⚠️ <span>L'INSEE ne fournit pas d'email ni de téléphone des dirigeants. <strong>Pappers</strong> : santé financière, bilans, dirigeant. <strong>LinkedIn</strong> : recherche pré-remplie du dirigeant.</span>
+    </div>
+
+    <div id="zone">
+      <div class="empty">
+        <div class="eico">🏢</div>
+        <h3>Prêt pour la prospection</h3>
+        <p>Sélectionne un secteur, renseigne ton département, puis lance la recherche.</p>
+      </div>
+    </div>
+
+    <div class="pag" id="pagBar" style="display:none">
+      <button class="btn-more" id="btnMore" onclick="loadMore()">⬇ Charger 200 de plus</button>
+      <span class="pinfo" id="pInfo"></span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── SECTEURS ──
+const SECTORS = [
+  {f:'🍽️ Alimentation & Restauration',e:'🍽️',l:'Restaurant traditionnel',k:'restaurant brasserie gastronomie cuisine',n:['56.10A']},
+  {f:'🍽️ Alimentation & Restauration',e:'🥡',l:'Restauration rapide',k:'fast food kebab pizza burger sandwicherie',n:['56.10C']},
+  {f:'🍽️ Alimentation & Restauration',e:'🥖',l:'Boulangerie-pâtisserie',k:'boulangerie patisserie boulanger patissier',n:['10.71C']},
+  {f:'🍽️ Alimentation & Restauration',e:'🥂',l:'Traiteur & événementiel',k:'traiteur mariage evenementiel reception',n:['56.21Z']},
+  {f:'🍽️ Alimentation & Restauration',e:'🍺',l:'Bar & café',k:'bar cafe pub brasserie debit boisson',n:['56.30Z']},
+  {f:'🍽️ Alimentation & Restauration',e:'🍫',l:'Chocolaterie & confiserie',k:'chocolat chocolatier confiserie',n:['10.82Z']},
+  {f:'🍽️ Alimentation & Restauration',e:'🛒',l:'Supermarché & grande distribution',k:'supermarche hypermarche superette epicerie',n:['47.11A','47.11B','47.11C','47.11D','47.11E','47.11F']},
+  {f:'🍽️ Alimentation & Restauration',e:'🥩',l:'Commerce alimentaire spécialisé',k:'boucherie charcuterie poissonnier fromagerie cave vin',n:['47.22Z','47.23Z','47.24Z','47.25Z','47.29Z']},
+  {f:'🏨 Hôtellerie & Tourisme',e:'🏨',l:'Hôtel',k:'hotel hotellerie hebergement',n:['55.10Z']},
+  {f:'🏨 Hôtellerie & Tourisme',e:'🏕️',l:'Hébergement touristique',k:'gite chambre hotes camping residence tourisme',n:['55.20Z','55.30Z','55.90Z']},
+  {f:'🏨 Hôtellerie & Tourisme',e:'✈️',l:'Agence de voyage',k:'agence voyage tourisme tour operateur',n:['79.11Z','79.12Z','79.90Z']},
+  {f:'🛍️ Commerce & Retail',e:'🛍️',l:'Commerce de détail',k:'commerce detail magasin boutique vente',n:['47.19A','47.19B']},
+  {f:'🛍️ Commerce & Retail',e:'👗',l:'Habillement & mode',k:'vetement mode habillement pret a porter textile',n:['47.71Z','47.72A','47.72B']},
+  {f:'🛍️ Commerce & Retail',e:'💻',l:'Électroménager & high-tech',k:'electromenager high tech informatique telephonie electronique',n:['47.41Z','47.42Z','47.43Z']},
+  {f:'🛍️ Commerce & Retail',e:'🚗',l:'Automobile (concessionnaire)',k:'automobile voiture concessionnaire',n:['45.11Z','45.19Z']},
+  {f:'🛍️ Commerce & Retail',e:'🌐',l:'E-commerce & vente en ligne',k:'vente en ligne ecommerce internet boutique web',n:['47.91A','47.91B','47.99B']},
+  {f:'🛍️ Commerce & Retail',e:'💊',l:'Pharmacie & parapharmacie',k:'pharmacie parapharmacie medicaments officine',n:['47.73Z']},
+  {f:'🏗️ BTP & Construction',e:'🏗️',l:'Construction générale',k:'construction batiment travaux btp gros oeuvre',n:['41.10A','41.10B','41.20A','41.20B']},
+  {f:'🏗️ BTP & Construction',e:'⚡',l:'Électricité & installation',k:'electricite electricien installation domotique',n:['43.21A','43.21B']},
+  {f:'🏗️ BTP & Construction',e:'🔧',l:'Plomberie & chauffage',k:'plomberie plombier chauffage sanitaire',n:['43.22A','43.22B']},
+  {f:'🏗️ BTP & Construction',e:'🪵',l:'Menuiserie & charpente',k:'menuiserie menuisier charpente charpentier bois',n:['43.32A','43.32B','43.32C']},
+  {f:'🏗️ BTP & Construction',e:'🎨',l:'Peinture & revêtements',k:'peinture peintre revetement sol carrelage',n:['43.30A','43.30B','43.31Z','43.33Z']},
+  {f:'🏗️ BTP & Construction',e:'📐',l:'Architecture & ingénierie',k:'architecte architecture ingenierie bureau etudes',n:['71.11Z','71.12B']},
+  {f:'⚙️ Industrie & Fabrication',e:'🏭',l:'Industrie manufacturière',k:'industrie fabrication manufacture production usine',n:['25.11Z','25.12Z','25.61Z','25.62A']},
+  {f:'⚙️ Industrie & Fabrication',e:'⚙️',l:'Mécanique & métallurgie',k:'mecanique metal metallurgie forge fonderie soudure',n:['24.10Z','24.20Z','25.50A','25.50B']},
+  {f:'⚙️ Industrie & Fabrication',e:'🧪',l:'Industrie chimique & plastique',k:'chimie chimique plastique caoutchouc',n:['20.11Z','20.12Z','22.11Z','22.19Z']},
+  {f:'⚙️ Industrie & Fabrication',e:'🥫',l:'Industrie agroalimentaire',k:'agroalimentaire agro alimentaire transformation viande laitier',n:['10.11Z','10.13A','10.51A','10.52Z','10.61B']},
+  {f:'⚙️ Industrie & Fabrication',e:'🖨️',l:'Imprimerie & édition',k:'imprimerie imprimeur edition editeur presse',n:['18.11Z','18.12Z','58.11Z','58.14Z']},
+  {f:'💼 Services aux Entreprises',e:'💼',l:'Conseil & management',k:'conseil consulting consultant management strategie',n:['70.21Z','70.22Z']},
+  {f:'💼 Services aux Entreprises',e:'📊',l:'Comptabilité & audit',k:'comptabilite comptable expert comptable audit',n:['69.20Z']},
+  {f:'💼 Services aux Entreprises',e:'⚖️',l:'Services juridiques',k:'avocat juridique droit notaire huissier',n:['69.10Z']},
+  {f:'💼 Services aux Entreprises',e:'📣',l:'Publicité & communication',k:'publicite agence communication marketing pub',n:['73.11Z','73.12A','73.12B','73.12Z']},
+  {f:'💼 Services aux Entreprises',e:'👥',l:'Recrutement & intérim',k:'recrutement interim travail temporaire rh ressources humaines',n:['78.10Z','78.20Z','78.30Z']},
+  {f:'💼 Services aux Entreprises',e:'🧹',l:'Nettoyage & propreté',k:'nettoyage proprete menage entretien',n:['81.21Z','81.22Z','81.29A','81.29B']},
+  {f:'💼 Services aux Entreprises',e:'🔐',l:'Sécurité & gardiennage',k:'securite gardiennage surveillance vigile protection',n:['80.10Z','80.20Z','80.30Z']},
+  {f:'💻 Numérique & Tech',e:'💻',l:'Développement logiciel & informatique',k:'informatique developpement logiciel software code programmation tech digital',n:['62.01Z','62.02A','62.02B','62.03Z','62.09Z']},
+  {f:'💻 Numérique & Tech',e:'🖥️',l:"Conseil en systèmes d'information",k:'systeme information SI ESN SSII conseil numerique transformation digitale',n:['63.11Z','63.12Z']},
+  {f:'💻 Numérique & Tech',e:'📡',l:'Télécommunications',k:'telecoms telecom operateur reseau internet fibre mobile',n:['61.10Z','61.20Z','61.30Z','61.90Z']},
+  {f:'💻 Numérique & Tech',e:'🤖',l:'Intelligence artificielle & data',k:'intelligence artificielle IA data science machine learning',n:['62.01Z','72.19Z']},
+  {f:'🏥 Santé & Médico-social',e:'🏥',l:'Hôpitaux & cliniques',k:'hopital clinique hospitalier chirurgie',n:['86.10Z']},
+  {f:'🏥 Santé & Médico-social',e:'👨‍⚕️',l:'Médecins & cabinets médicaux',k:'medecin generaliste specialiste cabinet medical',n:['86.21Z','86.22A','86.22B','86.22C','86.22D','86.22E']},
+  {f:'🏥 Santé & Médico-social',e:'🏡',l:'EHPAD & maisons de retraite',k:'ehpad maison retraite personnes agees dependance',n:['87.10A','87.10B']},
+  {f:'🏥 Santé & Médico-social',e:'🏠',l:'Aide à domicile',k:'aide domicile services personne maintien autonomie',n:['88.10A','88.10B','88.10C']},
+  {f:'🏥 Santé & Médico-social',e:'🦴',l:'Kinésithérapie & paramédical',k:'kinesitherapie kine paramédical ortho podologue infirmier',n:['86.90A','86.90B','86.90C','86.90D','86.90E','86.90F']},
+  {f:'🏥 Santé & Médico-social',e:'♿',l:'Établissements pour handicapés',k:'handicap handicape esat foyer accueil medico social',n:['87.20A','87.20B','88.91A','88.91B']},
+  {f:'🎓 Formation & Éducation',e:'📚',l:'Formation professionnelle',k:'formation organisme formation professionnelle bts master apprentissage',n:['85.59A','85.59B']},
+  {f:'🎓 Formation & Éducation',e:'🏫',l:'Enseignement scolaire',k:'ecole primaire college lycee enseignement scolaire',n:['85.10Z','85.20Z','85.31Z','85.32Z']},
+  {f:'🎓 Formation & Éducation',e:'🎓',l:'Enseignement supérieur',k:'universite ecole superieure grande ecole bachelor master',n:['85.42Z']},
+  {f:'🎓 Formation & Éducation',e:'✏️',l:'Soutien scolaire & coaching',k:'soutien scolaire cours particuliers coaching tutorat',n:['85.59A','85.60Z']},
+  {f:'🏠 Immobilier',e:'🏠',l:'Agence immobilière',k:'immobilier agence transaction vente location',n:['68.10Z','68.20A','68.20B']},
+  {f:'🏠 Immobilier',e:'🏢',l:'Promotion immobilière',k:'promotion immobiliere promoteur construction logement neuf',n:['41.10A','41.10B']},
+  {f:'🏠 Immobilier',e:'🔑',l:'Syndic & gestion locative',k:'syndic copropriete gestionnaire gestion locative',n:['68.32A','68.32B']},
+  {f:'🚛 Transport & Logistique',e:'🚛',l:'Transport routier de marchandises',k:'transport routier marchandise fret camion logistique livraison',n:['49.41A','49.41B','49.41C','49.42Z']},
+  {f:'🚛 Transport & Logistique',e:'🚌',l:'Transport de voyageurs',k:'transport voyageur bus autocar taxi vtc',n:['49.39A','49.39B','49.39C','49.32Z']},
+  {f:'🚛 Transport & Logistique',e:'📦',l:'Entreposage & stockage',k:'entrepot stockage logistique plateforme distribution',n:['52.10A','52.10B','52.29A','52.29B']},
+  {f:'✂️ Artisanat & Services',e:'✂️',l:'Coiffure',k:'coiffure coiffeur salon barbier',n:['96.02A']},
+  {f:'✂️ Artisanat & Services',e:'💅',l:'Esthétique & beauté',k:'esthetique beaute spa onglerie nail bar',n:['96.02B']},
+  {f:'✂️ Artisanat & Services',e:'🔧',l:'Garage & réparation auto',k:'garage reparation auto automobile moto mecanique',n:['45.20A','45.20B']},
+  {f:'✂️ Artisanat & Services',e:'🌿',l:'Jardinage & espaces verts',k:'jardinage jardins paysagiste entretien espaces verts',n:['81.30Z']},
+  {f:'✂️ Artisanat & Services',e:'👔',l:'Pressing & blanchisserie',k:'blanchisserie pressing nettoyage textiles laverie',n:['96.01A','96.01B']},
+  {f:'🌱 Agriculture & Environnement',e:'🌾',l:'Agriculture & élevage',k:'agriculture agricole elevage exploitation ferme',n:['01.11Z','01.13Z','01.41Z','01.42Z']},
+  {f:'🌱 Agriculture & Environnement',e:'🍇',l:'Viticulture & arboriculture',k:'viticulture vigne vigneron arboriculture fruits',n:['01.21Z','01.24Z','01.25Z']},
+  {f:'🌱 Agriculture & Environnement',e:'♻️',l:'Traitement des déchets',k:'dechets recyclage traitement collecte valorisation',n:['38.11Z','38.12Z','38.21Z','38.22Z']},
+  {f:'🌱 Agriculture & Environnement',e:'☀️',l:'Énergie renouvelable',k:'energie renouvelable solaire photovoltaique eolien',n:['35.11Z','35.12Z','35.13Z']},
+  {f:'🎭 Culture, Sport & Loisirs',e:'💪',l:'Sport & fitness',k:'sport fitness salle musculation gym coach sportif',n:['93.11Z','93.12Z','93.13Z','93.19Z']},
+  {f:'🎭 Culture, Sport & Loisirs',e:'🎭',l:'Arts & spectacle vivant',k:'spectacle theatre concert musique danse art',n:['90.01Z','90.02Z','90.03A','90.03B']},
+  {f:'🎭 Culture, Sport & Loisirs',e:'🎬',l:'Cinéma & audiovisuel',k:'cinema audiovisuel film video production tournage',n:['59.11A','59.11B','59.11C','59.12Z']},
+  {f:'🎭 Culture, Sport & Loisirs',e:'🎮',l:'Jeux & loisirs',k:'jeux loisirs parc attractions escape game bowling',n:['93.21Z','93.29Z']},
+  {f:'🏦 Banque & Finance',e:'🏦',l:'Banque & crédit',k:'banque credit financement pret emprunt',n:['64.19Z','64.11Z','64.92Z']},
+  {f:'🏦 Banque & Finance',e:'🛡️',l:'Assurance & mutuelle',k:'assurance mutuelle assureur courtier risque',n:['65.11Z','65.12Z','65.20Z','66.21Z','66.22Z']},
+  {f:'🏛️ Administrations & Collectivités',e:'🏛️',l:'Administration publique & collectivités',k:'administration publique mairie prefecture collectivite territoriale',n:['84.11Z','84.12Z','84.13Z']},
+  {f:'🏛️ Administrations & Collectivités',e:'🤝',l:'Associations & action sociale',k:'association loi 1901 action sociale solidarite benevole',n:['88.99A','88.99B','94.99Z']},
+];
+
+// ── ÉTAT ──
+let selected = null, allResults = [], shown = 0;
+const PAGE = 200;
+
+// ── RENDU SECTEURS ──
+function renderS(q) {
+  const grid = document.getElementById('sGrid');
+  const fl = (q||'').toLowerCase().trim();
+  grid.innerHTML = '';
+  const fams = {};
+  SECTORS.forEach(s => {
+    if (fl && !s.l.toLowerCase().includes(fl) && !s.k.toLowerCase().includes(fl) && !s.f.toLowerCase().includes(fl)) return;
+    if (!fams[s.f]) fams[s.f] = [];
+    fams[s.f].push(s);
+  });
+  const keys = Object.keys(fams);
+  if (!keys.length) { grid.innerHTML = '<div class="no-s">Aucun secteur trouvé.</div>'; return; }
+  keys.forEach(fam => {
+    const ft = document.createElement('div'); ft.className = 'ftitle'; ft.textContent = fam; grid.appendChild(ft);
+    fams[fam].forEach(s => {
+      const b = document.createElement('button');
+      b.className = 'sbtn' + (selected && selected.l === s.l ? ' active' : '');
+      b.innerHTML = `<span class="em">${s.e}</span>${s.l}`;
+      b.onclick = () => { selected = s; renderS(document.getElementById('sIn').value); };
+      grid.appendChild(b);
+    });
+  });
+}
+function filterS(v) { document.getElementById('sCl').style.display = v ? 'block' : 'none'; renderS(v); }
+function clearS() { document.getElementById('sIn').value = ''; document.getElementById('sCl').style.display = 'none'; renderS(''); }
+
+// ── RECHERCHE via proxy Netlify ──
+async function runSearch() {
+  if (!selected) { showErr('Sélectionne un secteur d\'activité.'); return; }
+  const dept = document.getElementById('dept').value.trim();
+  const cp   = document.getElementById('cp').value.trim();
+  if (!dept && !cp) { showErr('Renseigne au moins un département (ex : 42).'); return; }
+
+  allResults = []; shown = 0;
+  document.getElementById('zone').innerHTML = '<div class="loading"><div class="spin"></div><p>Interrogation de la base INSEE Sirene…</p></div>';
+  ['statsBar','banner','pagBar'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('btnCsv').disabled = true;
+
+  try {
+    const params = new URLSearchParams({ naf: selected.n.join(',') });
+    if (cp)   params.set('cp',   cp);
+    else if (dept) params.set('dept', dept);
+
+    const resp = await fetch(`/.netlify/functions/sirene?${params}`);
+    if (!resp.ok) { const e = await resp.json(); throw new Error(e.error || `HTTP ${resp.status}`); }
+    const data = await resp.json();
+
+    allResults = data.results || [];
+    if (!allResults.length) {
+      document.getElementById('zone').innerHTML = '<div class="empty"><div class="eico">🔍</div><h3>Aucun résultat</h3><p>Essaie un département voisin ou retire le code postal.</p></div>';
+      return;
+    }
+
+    shown = Math.min(PAGE, allResults.length);
+    renderTable(allResults.slice(0, shown));
+
+    document.getElementById('sAff').textContent   = shown;
+    document.getElementById('sTotal').textContent = (data.total || allResults.length).toLocaleString('fr-FR');
+    document.getElementById('sPill').innerHTML     = `<span class="spill">${selected.e} ${selected.l}</span>`;
+    document.getElementById('statsBar').style.display = 'flex';
+    document.getElementById('banner').style.display   = 'flex';
+    document.getElementById('btnCsv').disabled = false;
+
+    if (allResults.length > PAGE) {
+      document.getElementById('btnMore').innerHTML = `⬇ Voir ${Math.min(PAGE, allResults.length - shown)} de plus`;
+      document.getElementById('pInfo').textContent = `${shown} / ${allResults.length} affichées`;
+      document.getElementById('pagBar').style.display = 'flex';
+    }
+  } catch(err) {
+    document.getElementById('zone').innerHTML = `<div class="errbox"><p>⚠️ <strong>Erreur :</strong> ${escH(err.message)}</p></div>`;
+  }
+}
+
+// ── TABLE ──
+function renderTable(rows) {
+  document.getElementById('zone').innerHTML = `
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th>Entreprise</th><th>Adresse</th><th>NAF</th><th>Effectif</th><th>Liens</th></tr></thead>
+      <tbody>${rows.map((r,i) => `
+        <tr>
+          <td style="color:var(--text-muted);font-size:10.5px;font-weight:500">${i+1}</td>
+          <td class="tdn">${escH(r.nom)}<span class="sir">SIREN ${r.siren}</span></td>
+          <td class="tda">${escH(r.adresse)}</td>
+          <td><span class="tnaf">${r.naf}</span></td>
+          <td class="teff">${r.effectif}</td>
+          <td><div class="lks">
+            ${r.siren ? `<a class="lbtn lp" href="https://www.pappers.fr/entreprise/${r.siren}" target="_blank" rel="noopener">📊 Pappers</a>` : ''}
+            ${r.nom   ? `<a class="lbtn ll" href="https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(r.nom+' '+r.ville)}" target="_blank" rel="noopener">in Dirigeant</a>` : ''}
+          </div></td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+function loadMore() {
+  const prev = shown;
+  shown = Math.min(shown + PAGE, allResults.length);
+  renderTable(allResults.slice(0, shown));
+  document.getElementById('sAff').textContent = shown;
+  if (shown >= allResults.length) { document.getElementById('pagBar').style.display = 'none'; }
+  else {
+    document.getElementById('btnMore').innerHTML = `⬇ Voir ${Math.min(PAGE, allResults.length - shown)} de plus`;
+    document.getElementById('pInfo').textContent = `${shown} / ${allResults.length} affichées`;
+  }
+  setTimeout(() => { const r = document.querySelectorAll('tbody tr'); if (r[prev]) r[prev].scrollIntoView({behavior:'smooth',block:'center'}); }, 50);
+}
+
+// ── CSV ──
+function exportCSV() {
+  if (!allResults.length) return;
+  const h = ['Nom','SIREN','SIRET','Adresse','Ville','CP','Code NAF','Effectif','Lien Pappers','Recherche LinkedIn'];
+  const rows = allResults.map(r => [r.nom,r.siren,r.siret,r.adresse,r.ville,r.cp,r.naf,r.effectif,
+    r.siren ? `https://www.pappers.fr/entreprise/${r.siren}` : '',
+    r.nom   ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(r.nom+' '+r.ville)}` : ''
+  ]);
+  const csv = [h,...rows].map(row => row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `prospection_${(selected?.l||'').replace(/[^a-z0-9]/gi,'_').toLowerCase()}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showErr(m) { document.getElementById('zone').innerHTML = `<div class="errbox"><p>⚠️ ${m}</p></div>`; }
+function resetAll() {
+  selected = null; allResults = []; shown = 0;
+  ['dept','cp','sIn'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sCl').style.display = 'none';
+  ['statsBar','banner','pagBar'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('btnCsv').disabled = true;
+  document.getElementById('zone').innerHTML = '<div class="empty"><div class="eico">🏢</div><h3>Prêt pour la prospection</h3><p>Sélectionne un secteur, renseigne ton département, puis lance la recherche.</p></div>';
+  renderS('');
+}
+
+['dept','cp'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if (e.key==='Enter') runSearch(); }));
+renderS('');
+</script>
+</body>
+</html>
