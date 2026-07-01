@@ -13,10 +13,11 @@ exports.handler = async function (event) {
 
   let geoFilter = '';
   if (cp) {
-    geoFilter = ` AND codePostalEtablissement:${cp}`;
+    geoFilter = ` AND codePostalEtablissement:"${cp}"`;
   } else if (dept) {
     const d = dept.length === 1 ? '0' + dept : dept;
-    geoFilter = ` AND codePostalEtablissement:${d}*`;
+    // Utiliser une liste des codes postaux possibles pour ce département
+    geoFilter = ` AND (codePostalEtablissement:"${d}000" OR codePostalEtablissement:"${d}100" OR codePostalEtablissement:"${d}200" OR codePostalEtablissement:"${d}300" OR codePostalEtablissement:"${d}400" OR codePostalEtablissement:"${d}500" OR codePostalEtablissement:"${d}600" OR codePostalEtablissement:"${d}700" OR codePostalEtablissement:"${d}800" OR codePostalEtablissement:"${d}900")`;
   }
 
   const q = `(${nafQuery}) AND etatAdministratifEtablissement:A${geoFilter}`;
